@@ -28,6 +28,8 @@ node_modules
 npm-debug.log
 typings/globals
 typings/modules
+typings/auto.d.ts
+typings/index.d.ts
 
 # compile directory and sources
 dist
