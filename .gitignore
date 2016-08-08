@@ -22,9 +22,12 @@ coverage
 # Compiled binary addons (http://nodejs.org/api/addons.html)
 build/Release
 
-# Dependency directory
+# Dependency directory and manager
 # https://www.npmjs.org/doc/misc/npm-faq.html#should-i-check-my-node_modules-folder-into-git
 node_modules
+npm-debug.log
+typings/globals
+typings/modules
 
 # compile directory and sources
 dist
