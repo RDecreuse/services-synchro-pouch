@@ -14,6 +14,14 @@ export class AnimalService {
 
     }
 
+    initDb(): Observable<any> {
+        return Observable.create((observer: any) => {
+            new PouchDB(this.pouchDatabaseName).destroy().then(() => {
+                observer.complete();
+            });
+        });
+    }
+
     replicate(live: boolean): Observable<any> {
 
         this.db = new PouchDB(this.pouchDatabaseName);
@@ -70,14 +78,9 @@ export class AnimalService {
 
         return Observable.create((observer: any) => {
 
-            let db = new PouchDB(this.pouchDatabaseName);
-
-            db.allDocs().then((allDocs: any) => {
+            this.db.allDocs().then((allDocs: any) => {
                 for (let row of allDocs.rows) {
-                    console.log('retrieving doc ' + row.id);
-
-                    db.get(row.id).then((doc: any) => {
-                        console.log("document retrieved" + doc);
+                    this.db.get(row.id).then((doc: any) => {
                         observer.next(doc as Animal);
                     }).catch(function (err: any) {
                         console.log("can\'t retrieve document " + row.id + ", error=" + err);
@@ -86,6 +89,50 @@ export class AnimalService {
                 }
             });
 
+        });
+    }
+
+    createAnimal(newAnimal: Animal): Observable<any> {
+        console.log('create Animal start : ' + newAnimal._id);
+        newAnimal.channels = ["test"];
+        return Observable.create((observer: any) => {
+            this.db.put(newAnimal).then(() => {
+                observer.complete();
+            });
+        });
+    }
+
+    startUpstreamReplication() {
+        console.log("startUpstreamReplication");
+        this.db = new PouchDB(this.pouchDatabaseName);
+
+        let distantServer = new PouchDB('http://localhost:4984/r_animal');
+        let options = {
+            live: true,
+            retry: true,
+            back_off_function: function () {
+                return 8000;
+            }
+        };
+
+        PouchDB.replicate(this.db, distantServer, options).on('change', (info: any) => {
+            console.log("upload change event :" + info);
+            // handle change
+        }).on('paused', (err: any) => {
+            console.log("upload paused event");
+            // upload paused (e.g. upload up to date, user went offline)
+        }).on('active', () => {
+            console.log("upload active event");
+            // replicate resumed (e.g. new changes replicating, user went back online)
+        }).on('denied', function (err: any) {
+            console.log("upload denied event");
+            // a document failed to replicate (e.g. due to permissions)
+        }).on('complete', (info: any) => {
+            console.log("upload complete event");
+            // handle complete
+        }).on('error', (err: any) => {
+            console.log("upload error event");
+            // handle error
         });
     }
 }
