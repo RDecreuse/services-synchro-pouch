@@ -1,11 +1,9 @@
 {
   "name": "services-pouchdb",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "services for pouchDB synchronization",
-  "main": "dist/main.js",
   "scripts": {
-    "postinstall": "typings install && autodts link",
-    "prepublish": "tsc"
+    "postinstall": "typings install && autodts link && tsc"
   },
   "dependencies": {
     "rxjs": "5.0.0-beta.6",
@@ -14,7 +12,8 @@
   },
   "devDependencies": {
     "typescript": "~1.8.10",
-    "typings": "^1.3.1",
-    "autodts": "~0.0.4"
-  }
+    "typings": "^1.3.1"
+  },
+  "typings": "servicesPouch.d.ts",
+  "main": "services-pouchdb.js"
 }
